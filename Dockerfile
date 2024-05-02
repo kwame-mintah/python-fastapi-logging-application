@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=python:3.12
+ARG BASE_IMAGE=python:3.12.3
 FROM --platform=linux/amd64 $BASE_IMAGE
 
 # Set working directory as `/code/`
