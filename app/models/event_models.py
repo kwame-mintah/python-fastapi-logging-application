@@ -25,7 +25,8 @@ class UserEvent(BaseModel):
         examples=["ben_tennyson@cartoonnetwork.com"],
     )
     operation: str = Field(
-        title="Operation carried out by the user", examples=["read", "write"]
+        title="Operation carried out by the user",
+        examples=["read", "write", "read/write"],
     )
 
 
@@ -34,12 +35,15 @@ class SystemEvent(BaseModel):
     The system event log received
     """
 
-    system_id: str = Field(title="System generated id associated with the log event")
+    system_id: str = Field(
+        title="System generated id associated with the log event", examples=["id_125"]
+    )
     location: Locations = Field(
         title="Location where the system is based", examples=["us", "europe"]
     )
     operation: str = Field(
-        title="Operation carried out by the system", examples=["read", "write"]
+        title="Operation carried out by the system",
+        examples=["read", "write", "read/write"],
     )
 
 
@@ -49,24 +53,21 @@ class Event(BaseModel):
     """
 
     type: str = Field(title="The type of event received", examples=["user", "system"])
-    timestamp: PastDatetime = Field(title="Time event took place (must be in the past)")
-    event_id: str = Field(title="Unique id for event received", examples=["u_123"])
+    timestamp: PastDatetime = Field(
+        title="Time event took place (must be in the past)",
+        examples=["2006-01-13T00:00:00.000Z"],
+    )
+    event_id: str = Field(
+        title="Unique id for event received", examples=["u_123", "s_123"]
+    )
 
 
-class UserEventLog(Event):
+class EventLog(Event):
     """
     Incoming or stored user event log
     """
 
-    event: UserEvent
-
-
-class SystemEventLog(Event):
-    """
-    Incoming or stored system event log
-    """
-
-    event: SystemEvent
+    event: UserEvent | SystemEvent
 
 
 class InsertResult(BaseModel):
@@ -81,3 +82,12 @@ class InsertResult(BaseModel):
         title="Reason for failed log insertion",
         examples=["invalid_timestamp", "invalid_location"],
     )
+
+
+class QueryValidationError(BaseModel):
+    detail: str | None = Field(title="The FastAPI exception error message returned")
+    reason: dict | None = Field(title="The parameter that caused the validation error")
+
+
+class EventErrorMessage(BaseModel):
+    detail: str | None = Field(title="The FastAPI exception error message returned")
