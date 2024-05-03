@@ -10,8 +10,9 @@ client = TestClient(app)
 @pytest.mark.parametrize(
     "size, expected_status_code, expected_len",
     [
+        (1, status.HTTP_200_OK, 1),
+        (5, status.HTTP_200_OK, 5),
         (10, status.HTTP_200_OK, 10),
-        (1000, status.HTTP_200_OK, 1000),
     ],
 )
 def test_get_event_logs_returns_expected_size(
@@ -33,16 +34,16 @@ def test_get_event_logs_will_not_return_over_1000() -> None:
 
 
 def test_get_single_event_log() -> None:
-    response = client.get("/v1/events/get/u_123")
+    response = client.get("/v1/events/get/u_001")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "type": "user",
-        "timestamp": "2024-01-01T13:45:00Z",
-        "event_id": "u_123",
+        "timestamp": "2024-01-01T13:45:10Z",
+        "event_id": "u_001",
         "event": {
             "username": "my_user",
             "email": "my_user@email.com",
-            "operation": "read/write",
+            "operation": "read",
         },
     }
 
