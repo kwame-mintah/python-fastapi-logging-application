@@ -5,6 +5,8 @@ from pydantic import ValidationError
 
 from app.models.event_models import EventLog, InsertResult
 
+MAX_SIZE = 1000
+
 
 class DemoService:
     """
@@ -15,21 +17,24 @@ class DemoService:
         """
         Create a number of event logs depending on the size
         provided.
-
-        **NOTE**:
         """
         return self.example_stub_data(size=size)
 
     def return_event_log(self, event_id: str) -> EventLog:
         """
-        Get a single event log using the `event_id`
+        Return a single event log using the `event_id`.
         """
         return self.example_event_stub_data(event_id)
 
     def insert_event_logs(self, event_logs: List[dict]) -> List[InsertResult]:
         """
-        Get a single event log using the `event_id`
+        Insert event logs into archive.
         """
+        if len(event_logs) > MAX_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unable to process event logs, must be less than {MAX_SIZE}. Received: {len(event_logs)}",
+            )
         return self.example_insert_results(event_logs)
 
     @staticmethod
