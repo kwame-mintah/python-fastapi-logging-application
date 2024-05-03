@@ -23,7 +23,7 @@ router = APIRouter(prefix="/v1/events", tags=["events"])
     status_code=status.HTTP_200_OK,
 )
 async def get_event_logs(
-    size: Annotated[int, Query(le=1000)] = 10,
+    size: Annotated[int, Query(gt=0, le=1000)] = 10,
     service: DemoService = Depends(get_demo_service()),
 ) -> List[EventLog]:
     """
