@@ -1,9 +1,9 @@
+from fastapi import Request, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from fastapi import Request, status
 
-from app.models.event_models import QueryValidationError
+from app.models.event_models import EventsErrorMessage
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -14,8 +14,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder(
-            QueryValidationError(
-                detail=exc.errors()[0]["msg"], reason=request.query_params
+            EventsErrorMessage(
+                detail=[
+                    error["msg"] + " found in " + str(error["loc"])
+                    for error in exc.errors()
+                ]
             )
         ),
     )

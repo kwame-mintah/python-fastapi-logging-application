@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 from pydantic import BaseModel, PastDatetime, Field, EmailStr
 
@@ -64,7 +65,7 @@ class Event(BaseModel):
 
 class EventLog(Event):
     """
-    Incoming or stored user event log
+    Incoming or stored user / system event logs
     """
 
     event: UserEvent | SystemEvent
@@ -78,16 +79,11 @@ class InsertResult(BaseModel):
     event_id: str = Field(title="The event id provided", examples=["u_123", "s_125"])
     success: bool = Field(title="Result of insertion", examples=[True, False])
     error: str | None = Field(
-        default=None,
+        default="",
         title="Reason for failed log insertion",
-        examples=["invalid_timestamp", "invalid_location"],
+        examples=["", "invalid_timestamp", "invalid_location"],
     )
 
 
-class QueryValidationError(BaseModel):
-    detail: str | None = Field(title="The FastAPI exception error message returned")
-    reason: dict | None = Field(title="The parameter that caused the validation error")
-
-
-class EventErrorMessage(BaseModel):
-    detail: str | None = Field(title="The FastAPI exception error message returned")
+class EventsErrorMessage(BaseModel):
+    detail: List[str] = Field(title="The FastAPI exception error message returned")
