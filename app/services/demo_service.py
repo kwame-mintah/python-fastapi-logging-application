@@ -1,3 +1,4 @@
+import os
 from typing import List, Any
 
 from fastapi import HTTPException
@@ -7,7 +8,9 @@ import pickle
 from app.models.event_models import EventLog, InsertResult
 
 MAX_SIZE = 1000
-PICKLE_FILENAME = "data/logging.pkl"
+PICKLE_FILENAME = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "data", "logging.pkl")
+)
 
 
 class DemoService:
