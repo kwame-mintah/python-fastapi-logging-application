@@ -27,10 +27,7 @@ async def get_event_logs(
     service: DemoService = Depends(get_demo_service()),
 ) -> List[EventLog]:
     """
-    Get all stored event logs. Maximum of 1000 events are returned.
-
-    **NOTE**: Endpoint currently returns stubbed data, which will generate
-    a number of event logs depending on the `size` query parameter passed.
+    Return a number of stored event logs. Maximum of 1000 events are returned.
     """
     return service.return_event_logs(size)
 
@@ -49,10 +46,6 @@ async def get_event_log(
 ) -> EventLog:
     """
     Retrieve log event based on the event ID.
-
-    **NOTE**: Endpoint currently returns stubbed data, for demonstration purposes
-    only a single log event has been hard coded use `u_123` as the `event_id`
-    any other value will return a 404.
     """
     return service.return_event_log(event_id=event_id)
 
@@ -84,10 +77,6 @@ async def insert_event_logs(
     service: DemoService = Depends(get_demo_service()),
 ) -> List[InsertResult]:
     """
-    Insert new event logs into the application.
-
-    **NOTE**: Endpoint does not carry out any insert operations against a
-    database. Instead, will validate events received and return a response
-    to reflect a successful or unsuccessful database insertion.
+    Insert new event logs. Maximum of 1000 can be inserted in a single request.
     """
     return service.insert_event_logs(event)
