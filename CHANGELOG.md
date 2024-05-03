@@ -1,3 +1,9 @@
+## v1.1.1 (2024-05-03)
+
+### Refactor
+
+- **demo_service**: change how pickle found is located depending on operating system
+
 ## v1.1.0 (2024-05-03)
 
 ### Feat
