@@ -73,7 +73,7 @@ async def insert_event_logs(
                 default=EventLog(
                     type="system",
                     timestamp="2006-01-13T00:00:00.000Z",
-                    event_id="u_123",
+                    event_id="s_123",
                     event=SystemEvent(
                         system_id="id_123", location="europe", operation="read"
                     ),
