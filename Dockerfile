@@ -19,5 +19,8 @@ RUN chown -R nobody /code
 
 USER nobody
 
+# Ensure container is healthy using a healthcheck
+HEALTHCHECK CMD curl --fail http://localhost:8080/docs || exit 1
+
 # Start fastapi application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
