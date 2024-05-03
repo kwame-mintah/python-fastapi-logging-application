@@ -1,15 +1,15 @@
 from typing import List, Annotated
 
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, Body
 
-from app.services.demo_service import DemoService
 from app.dependencies import get_demo_service
 from app.models.event_models import (
     EventLog,
     InsertResult,
-    QueryValidationError,
-    EventErrorMessage,
+    EventsErrorMessage,
+    SystemEvent,
 )
+from app.services.demo_service import DemoService
 
 router = APIRouter(prefix="/v1/events", tags=["events"])
 
@@ -19,11 +19,11 @@ router = APIRouter(prefix="/v1/events", tags=["events"])
     operation_id="allEvents",
     summary="Retrieve all system and user log event types",
     response_model=List[EventLog],
-    responses={400: {"model": QueryValidationError}},
+    responses={400: {"model": EventsErrorMessage}},
     status_code=status.HTTP_200_OK,
 )
-async def get_events_logs(
-    size: Annotated[int, Query(lt=1000)] = 10,
+async def get_event_logs(
+    size: Annotated[int, Query(le=1000)] = 10,
     service: DemoService = Depends(get_demo_service()),
 ) -> List[EventLog]:
     """
@@ -40,7 +40,7 @@ async def get_events_logs(
     operation_id="getEvent",
     summary="Retrieve a single log event",
     response_model=EventLog,
-    responses={404: {"model": EventErrorMessage}},
+    responses={404: {"model": EventsErrorMessage}},
     status_code=status.HTTP_200_OK,
 )
 async def get_event_log(
@@ -48,7 +48,7 @@ async def get_event_log(
     service: DemoService = Depends(get_demo_service()),
 ) -> EventLog:
     """
-    Retrieve log event based on the event ID
+    Retrieve log event based on the event ID.
 
     **NOTE**: Endpoint currently returns stubbed data, for demonstration purposes
     only a single log event has been hard coded use `u_123` as the `event_id`
@@ -60,15 +60,34 @@ async def get_event_log(
 @router.post(
     path="/insert",
     operation_id="insertEvents",
-    summary="Insert user and/or system log events types",
+    summary="Insert user and/or system event log types",
     response_model=List[InsertResult],
+    responses={400: {"model": EventsErrorMessage}},
     status_code=status.HTTP_201_CREATED,
 )
 async def insert_event_logs(
-    event: List[EventLog],
+    event: List[
+        Annotated[
+            dict,
+            Body(
+                default=EventLog(
+                    type="system",
+                    timestamp="2006-01-13T00:00:00.000Z",
+                    event_id="u_123",
+                    event=SystemEvent(
+                        system_id="id_123", location="europe", operation="read"
+                    ),
+                ).model_dump()
+            ),
+        ]
+    ],
     service: DemoService = Depends(get_demo_service()),
 ) -> List[InsertResult]:
     """
-    TBA
+    Insert new event logs into the application.
+
+    **NOTE**: Endpoint does not carry out any insert operations against a
+    database. Instead, will validate events received and return a response
+    to reflect a successful or unsuccessful database insertion.
     """
-    return event
+    return service.insert_event_logs(event)

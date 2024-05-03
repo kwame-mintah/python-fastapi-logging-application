@@ -1,7 +1,9 @@
-from fastapi import HTTPException
 from typing import List
 
-from app.models.event_models import EventLog
+from fastapi import HTTPException
+from pydantic import ValidationError
+
+from app.models.event_models import EventLog, InsertResult
 
 
 class DemoService:
@@ -23,6 +25,12 @@ class DemoService:
         Get a single event log using the `event_id`
         """
         return self.example_event_stub_data(event_id)
+
+    def insert_event_logs(self, event_logs: List[dict]) -> List[InsertResult]:
+        """
+        Get a single event log using the `event_id`
+        """
+        return self.example_insert_results(event_logs)
 
     @staticmethod
     def example_stub_data(size: int) -> List[EventLog]:
@@ -74,3 +82,33 @@ class DemoService:
                 status_code=404, detail=f"Unable to find event log with {event_id}"
             )
         return user_event
+
+    @staticmethod
+    def example_insert_results(events: List[dict]) -> List[InsertResult]:
+        """
+        Validate event logs received and return a list of results for each success
+        or unsuccessful database insertion.
+        """
+        results = []
+        for event in events:
+            try:
+                event = EventLog(**event)
+                # TODO: Insert to database, as schema is valid.
+                results.append(
+                    InsertResult(event_id=event.event_id, success=True, error="")
+                )
+            except ValidationError as e:
+                message = str(e)
+                if "timestamp" in message:
+                    message = "invalid_timestamp"
+                elif "location" in message:
+                    message = "invalid_location"
+
+                results.append(
+                    InsertResult(
+                        event_id=event["event_id"] if event["event_id"] else "",
+                        success=False,
+                        error=message,
+                    )
+                )
+        return results
