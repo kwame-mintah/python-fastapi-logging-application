@@ -1,11 +1,13 @@
-from typing import List
+from typing import List, Any
 
 from fastapi import HTTPException
 from pydantic import ValidationError
+import pickle
 
 from app.models.event_models import EventLog, InsertResult
 
 MAX_SIZE = 1000
+PICKLE_FILENAME = "data/logging.pkl"
 
 
 class DemoService:
@@ -15,8 +17,7 @@ class DemoService:
 
     def return_event_logs(self, size: int) -> List[EventLog]:
         """
-        Create a number of event logs depending on the size
-        provided.
+        Return event logs stored within archive.
         """
         return self.example_stub_data(size=size)
 
@@ -40,65 +41,52 @@ class DemoService:
     @staticmethod
     def example_stub_data(size: int) -> List[EventLog]:
         """
-        Loop through and create a number of event logs
-        and return a list of `EventLogs`.
+        Load archive and return stored event logs. Returning set number
+        using `size` provided.
         """
-        example_list = []
-        for i in range(size):
-            event = EventLog(
-                **dict(
-                    {
-                        "type": "system",
-                        "timestamp": "2024-01-01T13:45:00.000Z",
-                        "event_id": f"s_{i:03}",
-                        "event": {
-                            "system_id": f"id_1{i:02}",
-                            "location": "europe",
-                            "operation": "read/write",
-                        },
-                    }
-                )
-            )
-            example_list.append(event)
-        return example_list
+        try:
+            with open(PICKLE_FILENAME, "r+b") as f:
+                stored_events = pickle.load(f)[:size]
+                return stored_events
+        except IndexError:
+            return []
 
     @staticmethod
     def example_event_stub_data(event_id: str):
         """
-        Provide a single user event log. Any attempts to retrieve
-        another `event_id` will return a 404 HTTP error.
+        Provide a single user event log stored within archive. If not found
+        returns HTTPException 404 error.
         """
-        user_event = EventLog(
-            **dict(
-                {
-                    "type": "user",
-                    "timestamp": "2024-01-01T13:45:00.000Z",
-                    "event_id": "u_123",
-                    "event": {
-                        "username": "my_user",
-                        "email": "my_user@email.com",
-                        "operation": "read/write",
-                    },
-                }
-            )
-        )
-        if event_id != user_event.event_id:
+        try:
+            with open(PICKLE_FILENAME, "r+b") as f:
+                stored_events = pickle.load(f)
+                result = list(
+                    filter(lambda event: event.event_id == event_id, stored_events)
+                )
+                if not result:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Unable to find event log with {event_id}",
+                    )
+                return result[0]
+        except (pickle.PicklingError, FileNotFoundError):
             raise HTTPException(
-                status_code=404, detail=f"Unable to find event log with {event_id}"
+                status_code=500,
+                detail=f"An error occurred when attempting to find event log with {event_id}",
             )
-        return user_event
 
     @staticmethod
     def example_insert_results(events: List[dict]) -> List[InsertResult]:
         """
         Validate event logs received and return a list of results for each success
-        or unsuccessful database insertion.
+        or unsuccessful archive insertion(s).
         """
         results = []
+        valid_events = []
         for event in events:
             try:
                 event = EventLog(**event)
-                # TODO: Insert to database, as schema is valid.
+                valid_events.append(event)
                 results.append(
                     InsertResult(event_id=event.event_id, success=True, error="")
                 )
@@ -116,4 +104,18 @@ class DemoService:
                         error=message,
                     )
                 )
+
+        # TODO: Replace usage of `pickle` with a database.
+        bulk_amend_existing_pickle_file(valid_events)
         return results
+
+
+def bulk_amend_existing_pickle_file(contents: Any) -> None:
+    """
+    Open existing pickle file and load the data. Existing data
+    should be a List of `EventLog`. Will write to existing pickle file
+    using extended list (appending to the end).
+    """
+    previous_data = pickle.load(open(PICKLE_FILENAME, "rb"))
+    previous_data.extend(contents)
+    pickle.dump(previous_data, open(PICKLE_FILENAME, "wb"))
