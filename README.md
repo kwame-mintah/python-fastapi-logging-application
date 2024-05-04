@@ -20,6 +20,7 @@ The application exposes `/v1/events/*` endpoints, which accommodates two types o
 can be consumed and/or returned in the same API request. The expected log event structure for these events is the following:
 
 - User:
+
   ```json
   {
     "type": "user",
@@ -32,6 +33,7 @@ can be consumed and/or returned in the same API request. The expected log event 
     }
   }
   ```
+
 - System:
   ```json
   {
@@ -52,10 +54,62 @@ All endpoints have been annotated with their models and through FastAPI swagger 
 
 Through Pydantic and FastAPI, API constraints have been addressed, for example ensuring the number of records inserted or returned
 cannot surpass 1000 and should return a [400 BAD request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400).
-As mentioned earlier, API specification and constraints can be found on `/docs` endpoint, it is recommended to read
-through and try out each endpoint.
+As mentioned earlier, API specification and constraints can be found on `/docs` endpoint, it is **recommended** to read
+through the swagger documentation and try out each endpoint.
+
+## Roadmap
+
+More works needs to be completed for the final version of the application. Below are additional things required for a
+clearer vision of what is envisioned of this application.
+
+### Implementing MongoDB
+
+As of version [v1.1.0](https://github.com/kwame-mintah/python-fastapi-logging-application/commit/cd423356da7193c37fae5ac7eb6dcf2a31634cb1), [`pickle`](https://docs.python.org/3.12/library/pickle.html)
+was introduced to the codebase as a placeholder for storing and querying log events on runtime. Ideally, [MongoDB](https://www.mongodb.com/docs/upcoming/release-notes/7.3/) will be
+used as a datastore for log events. This is because log events received are in `JSON` format and MongoDB stores data as [`BSON`](https://www.mongodb.com/json-and-bson)
+as both are closely related, storing will be much easier without having to do many additional steps.
+
+The following tasks will need to be completed to accomplish this:
+
+1. Select an appropriate Object Document Mapper (ODM), most likely [Motor](https://www.mongodb.com/docs/drivers/motor/).
+2. Configure credentials for [connecting](https://www.mongodb.com/docs/drivers/motor/#connect-to-a-mongodb-server-on-your-local-machine)
+   to MongoDB using environment variables and storing values in a suitable [pass](https://www.passwordstore.org/) store
+   or secrets manager etc.
+3. Create a new database for storing log events. A new Pydantic model will be created to represent the Database model e.g.
+   `EventLogsCollection` re-using the existing model `EventLog` encapsulated as a list.
+4. Update existing endpoints and services to use `CRUD` operations against MongoDB.
+
+### Deploying to Kubernetes using Helm charts
+
+A `Dockerfile` is included in this project to start the FastAPI server within a docker container. The next step is to use
+the docker image created as part of deployment to a [Kubernetes](https://kubernetes.io/) cluster using [Helm](https://helm.sh/).
+Most major cloud providers e.g. Google, AWS, Azure etc. provide a Kubernetes service, deploying to any of the providers
+will demonstrate a scalable and highly available FastAPI application.
+
+The following tasks will need to be completed to accomplish this:
+
+1. A new continuous integration (CI) / continuous delivery (CD) pipeline that will build and push new docker images to
+   a remote repository, so it can be pulled down later for deployments to Kubernetes.
+2. Configure a Kubernetes cluster within the chose cloud provider using [Terraform](https://www.terraform.io/).
+3. Create necessary `.yaml` configuration files to specify docker image, networking, environment variables etc.
+4. Deploy to the Kubernetes namespace using helm.
+
+### API Improvements
+
+The current query parameters supported as [v1.0.0](https://github.com/kwame-mintah/python-fastapi-logging-application/commit/640dd23fa0ec3fdfff4026c1f075314707db7547)
+for the `/v1/endpoints/all` endpoint is `?size=`. Although there is a size limit of 1000, does not mean that there is a
+maximum of 1000 log event stored within the database. Allowing the ability to Paginate the log events returned. Will allow
+end users to potentially scroll through all log events without it being an expense operation against the database.
+
+The following tasks will need to be completed to accomplish this:
+
+1. Create a new Pydantic model to represent the Paginated response e.g. `PaginatedEventResponse`. Detailing, the size,
+   from, total etc.
+2. Update existing endpoint `response_model` to reflect the new response.
 
 ## Usage
+
+All commands snippets are run within the root directory of the project. After cloning the repository, please change directories.
 
 1. Install python packages used for the service:
 
@@ -83,6 +137,12 @@ docker-compose up --build -d
 
 Endpoint documentation is available on: http://localhost:8080/docs
 
+To shut down the docker containers:
+
+```console
+docker-compose down --remove-orphans
+```
+
 > [!NOTE]
 > The command provided ensures that a new image is built ([`--build`](https://docs.docker.com/reference/cli/docker/compose/build/)),
 > each time to facilitate potential code changes in between container runs. If not provided, the same docker image will
@@ -95,6 +155,12 @@ Unit tests are located in `/tests/unit` directory, run unit tests using:
 
 ```console
 pytest tests/unit
+```
+
+Integration tests are located in `/tests/integration` directory, run integration using:
+
+```console
+pytest tests/integration
 ```
 
 ## Contributing
@@ -115,6 +181,6 @@ GitHub project has three workflow set up, found in `.github/workflows/`:
 
 - '🧹 Run linter' (`run-linter.yml`): To run [Flake8](https://flake8.pycqa.org/en/latest/) and check Python code system and comply with various style guides.
 - '🧪 Run unit tests' (`run-unit-tests.yml`): To run unit tests within a continuous integration (CI) environment, using [`pytest`](https://docs.pytest.org/en/8.2.x/).
-- '🚧 Bump version' (`run-version-bump`): To create a new GitHub tag based on [semantic versioning](https://semver.org/) using [commitizen](https://commitizen-tools.github.io/commitizen/).
+- '🚧 Bump version' (`run-version-bump.yml`): To create a new GitHub tag based on [semantic versioning](https://semver.org/) using [commitizen](https://commitizen-tools.github.io/commitizen/).
 
 [^1]: A [`platform`](https://docs.docker.com/compose/compose-file/build/#platforms) has been specified to ensure the host machine, uses the correct platform during docker image build.
