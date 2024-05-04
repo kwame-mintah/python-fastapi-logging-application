@@ -19,7 +19,7 @@ router = APIRouter(prefix="/v1/events", tags=["events"])
     operation_id="allEvents",
     summary="Retrieve all system and user log event types",
     response_model=List[EventLog],
-    responses={400: {"model": EventsErrorMessage}},
+    responses={400: {"model": EventsErrorMessage}, 500: {"model": EventsErrorMessage}},
     status_code=status.HTTP_200_OK,
 )
 async def get_event_logs(
@@ -37,7 +37,7 @@ async def get_event_logs(
     operation_id="getEvent",
     summary="Retrieve a single log event",
     response_model=EventLog,
-    responses={404: {"model": EventsErrorMessage}},
+    responses={404: {"model": EventsErrorMessage}, 500: {"model": EventsErrorMessage}},
     status_code=status.HTTP_200_OK,
 )
 async def get_event_log(
@@ -55,7 +55,7 @@ async def get_event_log(
     operation_id="insertEvents",
     summary="Insert user and/or system event log types",
     response_model=List[InsertResult],
-    responses={400: {"model": EventsErrorMessage}},
+    responses={400: {"model": EventsErrorMessage}, 500: {"model": EventsErrorMessage}},
     status_code=status.HTTP_201_CREATED,
 )
 async def insert_event_logs(
