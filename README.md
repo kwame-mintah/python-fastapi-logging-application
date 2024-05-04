@@ -157,6 +157,14 @@ Unit tests are located in `/tests/unit` directory, run unit tests using:
 pytest tests/unit
 ```
 
+Additionally, a coverage report can be generated using [`pytest-cov`](https://pypi.org/project/pytest-cov/):
+
+```console
+pytest tests/unit --cov --cov-report=html:coverage_report
+```
+
+Will generate a coverage HTML file, in the `/coverage_report/` directory, simply open the `index.html` in your chosen web browser [^2].
+
 Integration tests are located in `/tests/integration` directory, run integration using:
 
 ```console
@@ -184,3 +192,4 @@ GitHub project has three workflow set up, found in `.github/workflows/`:
 - '🚧 Bump version' (`run-version-bump.yml`): To create a new GitHub tag based on [semantic versioning](https://semver.org/) using [commitizen](https://commitizen-tools.github.io/commitizen/).
 
 [^1]: A [`platform`](https://docs.docker.com/compose/compose-file/build/#platforms) has been specified to ensure the host machine, uses the correct platform during docker image build.
+[^2]: The GitHub workflow ['🧪 Run unit tests'](https://github.com/kwame-mintah/python-fastapi-logging-application/actions/workflows/run-unit-tests.yml) provides a brief overview of coverage for each file, when viewing the step 'Run tests with pytest with coverage'.
