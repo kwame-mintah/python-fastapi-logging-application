@@ -51,7 +51,7 @@ class DemoService:
             with open(PICKLE_FILENAME, "r+b") as f:
                 stored_events = pickle.load(f)[:size]
                 return stored_events
-        except IndexError:
+        except (pickle.PicklingError, FileNotFoundError, IndexError):
             return []
 
     @staticmethod
