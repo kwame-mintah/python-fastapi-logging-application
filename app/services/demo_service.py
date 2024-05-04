@@ -22,13 +22,13 @@ class DemoService:
         """
         Return event logs stored within archive.
         """
-        return self.example_stub_data(size=size)
+        return self.example_return_event_logs(size=size)
 
     def return_event_log(self, event_id: str) -> EventLog:
         """
         Return a single event log using the `event_id`.
         """
-        return self.example_event_stub_data(event_id)
+        return self.example_return_event_log(event_id)
 
     def insert_event_logs(self, event_logs: List[dict]) -> List[InsertResult]:
         """
@@ -39,10 +39,10 @@ class DemoService:
                 status_code=400,
                 detail=f"Unable to process event logs, must be less than {MAX_SIZE}. Received: {len(event_logs)}",
             )
-        return self.example_insert_results(event_logs)
+        return self.example_insert_event_logs_results(event_logs)
 
     @staticmethod
-    def example_stub_data(size: int) -> List[EventLog]:
+    def example_return_event_logs(size: int) -> List[EventLog]:
         """
         Load archive and return stored event logs. Returning set number
         using `size` provided.
@@ -58,7 +58,7 @@ class DemoService:
             )
 
     @staticmethod
-    def example_event_stub_data(event_id: str):
+    def example_return_event_log(event_id: str):
         """
         Provide a single user event log stored within archive. If not found
         returns HTTPException 404 error.
@@ -82,7 +82,7 @@ class DemoService:
             )
 
     @staticmethod
-    def example_insert_results(events: List[dict]) -> List[InsertResult]:
+    def example_insert_event_logs_results(events: List[dict]) -> List[InsertResult]:
         """
         Validate event logs received and return a list of results for each success
         or unsuccessful archive insertion(s).
