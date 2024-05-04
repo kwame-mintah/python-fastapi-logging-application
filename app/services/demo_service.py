@@ -51,8 +51,11 @@ class DemoService:
             with open(PICKLE_FILENAME, "r+b") as f:
                 stored_events = pickle.load(f)[:size]
                 return stored_events
-        except (pickle.PicklingError, FileNotFoundError, IndexError):
-            return []
+        except (pickle.PicklingError, FileNotFoundError, IndexError) as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"An error occurred when attempting to retrieve all log records with: {e}",
+            )
 
     @staticmethod
     def example_event_stub_data(event_id: str):
