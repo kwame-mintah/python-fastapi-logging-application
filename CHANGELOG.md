@@ -1,3 +1,9 @@
+## v1.1.2 (2024-05-04)
+
+### Refactor
+
+- **example_stub_data**: catch additional potential exceptions
+
 ## v1.1.1 (2024-05-03)
 
 ### Refactor
