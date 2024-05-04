@@ -160,7 +160,7 @@ pytest tests/unit
 Additionally, a coverage report can be generated using [`pytest-cov`](https://pypi.org/project/pytest-cov/):
 
 ```console
-pytest tests/unit --cov --cov-report=html:coverage_report
+pytest --cov=app tests/unit --cov-report=html:coverage_report
 ```
 
 Will generate a coverage HTML file, in the `/coverage_report/` directory, simply open the `index.html` in your chosen web browser [^2].
