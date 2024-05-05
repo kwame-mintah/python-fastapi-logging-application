@@ -1,3 +1,11 @@
+## v1.1.3 (2024-05-05)
+
+### Refactor
+
+- **demo_service**: rename function names to be a bit clearer
+- **events**: include http 500 responses to endpoints
+- **example_stub_data**: throw `HTTPException` rather than empty list
+
 ## v1.1.2 (2024-05-04)
 
 ### Refactor
