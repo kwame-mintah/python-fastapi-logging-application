@@ -1,8 +1,10 @@
 # Python FastAPI Logging Application
 
+![python](https://img.shields.io/badge/python-3.12.3-informational)
 ![fastapi-0.110.3-informational](https://img.shields.io/badge/fastapi-0.109.0-informational)
-[![🧪 Run unit tests](https://github.com/kwame-mintah/python-fastapi-logging-application/actions/workflows/run-unit-tests.yml/badge.svg)](https://github.com/kwame-mintah/python-fastapi-logging-application/actions/workflows/run-unit-tests.yml)
+![semver](https://img.shields.io/badge/semver-2.0.0-blue)
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+[![🧪 Run unit tests](https://github.com/kwame-mintah/python-fastapi-logging-application/actions/workflows/run-unit-tests.yml/badge.svg)](https://github.com/kwame-mintah/python-fastapi-logging-application/actions/workflows/run-unit-tests.yml)
 
 This project aims to demonstrate an external application receiving logs, from another system. Logs received will be stored
 within the applications' database. Storing and retrieval of log events will be exposed via endpoints using the
@@ -59,7 +61,7 @@ through the swagger documentation and try out each endpoint.
 
 ## Roadmap
 
-More works needs to be completed for the final version of the application. Below are additional things required for a
+More work needs to be completed for the final version of the application. Below are additional things required for a
 clearer vision of what is envisioned of this application.
 
 ### Implementing MongoDB
@@ -73,15 +75,20 @@ The following tasks will need to be completed to accomplish this:
 
 1. Select an appropriate Object Document Mapper (ODM), most likely [Motor](https://www.mongodb.com/docs/drivers/motor/).
 2. Configure credentials for [connecting](https://www.mongodb.com/docs/drivers/motor/#connect-to-a-mongodb-server-on-your-local-machine)
-   to MongoDB using environment variables and storing values in a suitable [pass](https://www.passwordstore.org/) store
+   to MongoDB using environment variables and store values in a suitable [pass](https://www.passwordstore.org/) store
    or secrets manager etc.
 3. Create a new database for storing log events. A new Pydantic model will be created to represent the Database model e.g.
    `EventLogsCollection` re-using the existing model `EventLog` encapsulated as a list.
 4. Update existing endpoints and services to use `CRUD` operations against MongoDB.
 
+> [!NOTE]
+> Due to `pickle` being used, duplicate `event_id` can be inserted, so using the `/v1/event/get/{event_id}` will
+> only return one result and not the duplicate log events. This is the intended behaviour in the final version,
+> as the MongoDB `_id` for the document will use the `event_id` when being saved into the database.
+
 ### Deploying to Kubernetes using Helm charts
 
-A `Dockerfile` is included in this project to start the FastAPI server within a docker container. The next step is to use
+A `Dockerfile` is included to start the FastAPI server within a docker container. The next step is to use
 the docker image created as part of deployment to a [Kubernetes](https://kubernetes.io/) cluster using [Helm](https://helm.sh/).
 Most major cloud providers e.g. Google, AWS, Azure etc. provide a Kubernetes service, deploying to any of the providers
 will demonstrate a scalable and highly available FastAPI application.
@@ -90,7 +97,7 @@ The following tasks will need to be completed to accomplish this:
 
 1. A new continuous integration (CI) / continuous delivery (CD) pipeline that will build and push new docker images to
    a remote repository, so it can be pulled down later for deployments to Kubernetes.
-2. Configure a Kubernetes cluster within the chose cloud provider using [Terraform](https://www.terraform.io/).
+2. Configure a Kubernetes cluster within the chosen cloud provider using [Terraform](https://www.terraform.io/).
 3. Create necessary `.yaml` configuration files to specify docker image, networking, environment variables etc.
 4. Deploy to the Kubernetes namespace using helm.
 
@@ -98,14 +105,40 @@ The following tasks will need to be completed to accomplish this:
 
 The current query parameters supported as [v1.0.0](https://github.com/kwame-mintah/python-fastapi-logging-application/commit/640dd23fa0ec3fdfff4026c1f075314707db7547)
 for the `/v1/endpoints/all` endpoint is `?size=`. Although there is a size limit of 1000, does not mean that there is a
-maximum of 1000 log event stored within the database. Allowing the ability to Paginate the log events returned. Will allow
-end users to potentially scroll through all log events without it being an expense operation against the database.
+maximum of 1000 log event stored within the database. Providing the ability to Paginate the log events returned, allows
+end users to potentially scroll through all log events without being an expense operation against the database.
 
 The following tasks will need to be completed to accomplish this:
 
 1. Create a new Pydantic model to represent the Paginated response e.g. `PaginatedEventResponse`. Detailing, the size,
    from, total etc.
 2. Update existing endpoint `response_model` to reflect the new response.
+3. Implement MongoDB [`MotorCursor.skip()`](https://motor.readthedocs.io/en/stable/api-tornado/cursors.html#motor.motor_tornado.MotorCursor.skip)
+   to include how many documents to fetch, offset etc.
+
+## Prerequisite
+
+You will need to create a virtual environment, please follow the official [Python guide](https://docs.python.org/3.12/library/venv.html) how on doing this.
+
+## Project structure
+
+The project file structure follows the same blueprint [documented](https://fastapi.tiangolo.com/tutorial/bigger-applications/#an-example-file-structure) by FastAPI.
+
+```markdown
+.
+├── app/
+│ ├── **init**.py
+│ ├── main.py
+│ ├── dependencies.py
+│ ├── data/
+│ ├── exceptions/
+│ ├── models/
+│ ├── routers/
+│ └── services/
+└── tests/
+├── integration/
+└── unit/
+```
 
 ## Usage
 
