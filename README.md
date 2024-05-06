@@ -127,7 +127,7 @@ The project file structure follows the same blueprint [documented](https://fasta
 ```markdown
 .
 ├── app/
-│ ├── **init**.py
+│ ├── __init__.py
 │ ├── main.py
 │ ├── dependencies.py
 │ ├── data/
