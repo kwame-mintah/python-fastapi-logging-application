@@ -28,6 +28,10 @@ async def get_event_logs(
 ) -> List[EventLog]:
     """
     Return a number of stored event logs. Maximum of 1000 events are returned.
+
+    :param size: number of log events to return.
+    :param service: service layer for queries.
+    :return: list of event logs.
     """
     return service.return_event_logs(size)
 
@@ -46,6 +50,10 @@ async def get_event_log(
 ) -> EventLog:
     """
     Retrieve log event based on the event ID.
+
+    :param event_id: event log to return.
+    :param service: service layer for queries.
+    :return: single event log.
     """
     return service.return_event_log(event_id=event_id)
 
@@ -78,5 +86,9 @@ async def insert_event_logs(
 ) -> List[InsertResult]:
     """
     Insert new event logs. Maximum of 1000 can be inserted in a single request.
+
+    :param event: list of event logs.
+    :param service: service layer for queries.
+    :return: list containing outcomes.
     """
     return service.insert_event_logs(event)
