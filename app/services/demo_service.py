@@ -111,9 +111,7 @@ class DemoService:
             try:
                 event = EventLog(**event)
                 valid_events.append(event)
-                results.append(
-                    InsertResult(event_id=event.event_id, success=True, error="")
-                )
+                results.append(InsertResult(event_id=event.event_id, success=True))
             except ValidationError as e:
                 message = str(e)
                 if "timestamp" in message:
