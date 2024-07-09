@@ -1,3 +1,18 @@
+## v2.0.0 (2024-07-09)
+
+### BREAKING CHANGE
+
+- previous endpoint pathing for `/v1/events` e.g. `/all`, `/get` and `/insert` have been removed and single noun will be used for `/v1/events` endpoint for `GET` and `POST`
+
+### Feat
+
+- **events**: use single noun for `/events` endpoints
+
+### Refactor
+
+- **main**: add title for application swagger documentation
+- **demo_service**: remove `error` property for valid events
+
 ## v1.1.3 (2024-05-05)
 
 ### Refactor
