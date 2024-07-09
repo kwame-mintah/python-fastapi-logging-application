@@ -15,7 +15,7 @@ router = APIRouter(prefix="/v1/events", tags=["events"])
 
 
 @router.get(
-    path="/all",
+    path="",
     operation_id="allEvents",
     summary="Retrieve all system and user log event types",
     response_model=List[EventLog],
@@ -37,7 +37,7 @@ async def get_event_logs(
 
 
 @router.get(
-    path="/get/{event_id}",
+    path="/{event_id}",
     operation_id="getEvent",
     summary="Retrieve a single log event",
     response_model=EventLog,
@@ -59,15 +59,15 @@ async def get_event_log(
 
 
 @router.post(
-    path="/insert",
+    path="",
     operation_id="insertEvents",
     summary="Insert user and/or system event log types",
     response_model=List[InsertResult],
     responses={400: {"model": EventsErrorMessage}, 500: {"model": EventsErrorMessage}},
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
 )
 async def insert_event_logs(
-    event: List[
+    events: List[
         Annotated[
             dict,
             Body(
@@ -87,8 +87,8 @@ async def insert_event_logs(
     """
     Insert new event logs. Maximum of 1000 can be inserted in a single request.
 
-    :param event: list of event logs.
+    :param events: list of event logs.
     :param service: service layer for queries.
     :return: list containing outcomes.
     """
-    return service.insert_event_logs(event)
+    return service.insert_event_logs(events)

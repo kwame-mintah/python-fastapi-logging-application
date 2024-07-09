@@ -82,7 +82,7 @@ The following tasks will need to be completed to accomplish this:
 4. Update existing endpoints and services to use `CRUD` operations against MongoDB.
 
 > [!NOTE]
-> Due to `pickle` being used, duplicate `event_id` can be inserted, so using the `/v1/event/get/{event_id}` will
+> Due to `pickle` being used, duplicate `event_id` can be inserted, so using the `/v1/events/{event_id}` will
 > only return one result and not the duplicate log events. This is the intended behaviour in the final version,
 > as the MongoDB `_id` for the document will use the `event_id` when being saved into the database.
 

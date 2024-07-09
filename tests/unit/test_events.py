@@ -18,13 +18,13 @@ client = TestClient(app)
 def test_get_event_logs_returns_expected_size(
     size, expected_status_code, expected_len
 ) -> None:
-    response = client.get(f"/v1/events/all?size={size}")
+    response = client.get(f"/v1/events?size={size}")
     assert response.status_code == expected_status_code
     assert len(response.json()) == expected_len
 
 
 def test_get_event_logs_will_not_return_over_1000() -> None:
-    response = client.get("/v1/events/all?size=1001")
+    response = client.get("/v1/events?size=1001")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {
         "detail": [
@@ -34,7 +34,7 @@ def test_get_event_logs_will_not_return_over_1000() -> None:
 
 
 def test_get_single_event_log() -> None:
-    response = client.get("/v1/events/get/u_001")
+    response = client.get("/v1/events/u_001")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "type": "user",
@@ -49,7 +49,7 @@ def test_get_single_event_log() -> None:
 
 
 def test_get_single_event_log_not_found() -> None:
-    response = client.get("/v1/events/get/u_404")
+    response = client.get("/v1/events/u_404")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": "Unable to find event log with u_404"}
 
@@ -63,8 +63,8 @@ def test_insert_event_logs_valid_event() -> None:
             "event": {"system_id": "id_123", "location": "europe", "operation": "read"},
         }
     ]
-    response = client.post(url="/v1/events/insert", json=body)
-    assert response.status_code == status.HTTP_201_CREATED
+    response = client.post(url="/v1/events", json=body)
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == [{"event_id": "s_123", "success": True, "error": ""}]
 
 
@@ -77,8 +77,8 @@ def test_insert_event_logs_invalid_event() -> None:
             "event": {"system_id": "id_123", "location": "jetix", "operation": "read"},
         }
     ]
-    response = client.post(url="/v1/events/insert", json=body)
-    assert response.status_code == status.HTTP_201_CREATED
+    response = client.post(url="/v1/events", json=body)
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
         {"event_id": "s_123", "success": False, "error": "invalid_location"}
     ]
@@ -103,8 +103,8 @@ def test_insert_event_logs_valid_and_invalid_events() -> None:
             "event": {"system_id": "id_123", "location": "jetix", "operation": "read"},
         },
     ]
-    response = client.post(url="/v1/events/insert", json=body)
-    assert response.status_code == status.HTTP_201_CREATED
+    response = client.post(url="/v1/events", json=body)
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
         {"error": "", "event_id": "u_123", "success": True},
         {"error": "invalid_location", "event_id": "s_123", "success": False},
