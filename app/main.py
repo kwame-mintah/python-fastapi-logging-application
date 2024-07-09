@@ -5,7 +5,9 @@ from fastapi.exceptions import RequestValidationError
 from app.exceptions.events_exceptions import validation_exception_handler
 from app.routers import events
 
-app = FastAPI()
+app = FastAPI(
+    title="Demonstrate an external application receiving logs, from another system."
+)
 app.include_router(events.router)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
